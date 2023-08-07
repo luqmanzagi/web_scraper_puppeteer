@@ -1,4 +1,5 @@
 const puppeteer = require('puppeteer');
+const tld = require('tldts');
 
 (async () => {
     function asyncProcess() {
@@ -38,42 +39,42 @@ const puppeteer = require('puppeteer');
     }
     
     // Using
-    const browser = await puppeteer.launch({ headless: false })
-    const page = await browser.newPage()
+    const browser = await puppeteer.launch({ devtools: true })
+    const page = await browser.newPage();
+    urlPath = 'https://amazon.com';
     
-    await page.goto('https://amazon.com')
+    await page.goto(urlPath);
 
     const listLink = await page.$$eval("a", as => as.map(a => a.href));
     const listLinkUnique = [...new Set(listLink)];
-    let promList = [];
-    console.log(listLinkUnique.length);
+    // let promList = [];
+    // console.log(listLinkUnique);
     for (let link of listLinkUnique) {
         console.log(link)
-        // if (link !== ""){
-        //     continue
-        // }
+        if (tld.getDomain(link) !== tld.getDomain(urlPath)){
+            continue
+        }
         let selec = 'a[href="' + link + '"]';
         console.log (selec)
         console.log("--------")
         // Click on link with middle button to open in new browser tab
-        // try{
-        //     await page.click(selec, { button : 'middle' })
-
-        // }catch(err){console.error(err)};
-        
-        // // Wait for new tab and return a page instance
-        // const newPage = await getNewBrowserTab(browser)
-        
-        // // Switch to new tab
-        // await newPage.bringToFront()
-        
-        // // Wait a bit to see the page
-        // await new Promise(resolve => setTimeout(resolve, 1000))
-        // console.log(await newPage.url())
-        // await newPage.close()
+        try{
+            debugger;
+            // await page.waitForSelector(selec);
+            await page.click(selec, { button : 'middle' })
+            // Wait for new tab and return a page instance
+            const newPage = await getNewBrowserTab(browser)
+            
+            // Switch to new tab
+            await newPage.bringToFront()
+            
+            // Wait a bit to see the page
+            await new Promise(resolve => setTimeout(resolve, 1000))
+            console.log(await newPage.url())
+            console.log('***********************')
+            await newPage.close()
+            }catch(err){console.error(err)};    
     }
-
-
     await page.close()
     await browser.close()
   
